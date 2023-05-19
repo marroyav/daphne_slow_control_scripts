@@ -11,11 +11,14 @@ for i in [4,5,7,9]:
 
     #thing.write(0x3000,[0x812080+i])
     
-    thing.write(0x3001,[0xaa])
+    thing.write(0x3001,[0xff])
     #thing.write(0x6000,[0x1f4])
-    for i in range (1):
-        thing.write(0x5000+i,[7])
-        print(f"reg 5001 = {thing.read(0x5000+i,1)[2]}")
+    var = 0x5000-1
+    for i in range (5):
+        for j in range(8):
+            var = var + 1
+            thing.write(var,[i*10+j])
+            print(f"reg {hex(var)} = {thing.read(var,1)[2]}")
            
     thing.close()
 
