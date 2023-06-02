@@ -2,8 +2,10 @@
 # dump.py -- dump DAPHNE spy buffers Python3
 
 from oei import *
-for i in [4,5,7,9]:
-    thing = OEI(f"10.73.137.10{i}")
+ip_endpoints_salev = [104, 105, 107, 109]
+ip_endpoints_jura = [111] #, 112]
+for i in ip_endpoints_salev:
+    thing = OEI(f"10.73.137.{i}")
 
     print("DAPHNE firmware version %0X" % thing.read(0x9000,1)[2])
 

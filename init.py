@@ -50,10 +50,10 @@ def write_and_read(thing, CmdString, get_response=True):
 
 def main():
 	thing = OEI("10.73.137.109")
-	if False:
+	if True:
 		write_and_read(thing, 'RD OFFSET CH 6', get_response=True)
 
-	if True:
+	if False:
 		print('Sending commands to DAPHNE. ')
 		# run initial command
 		initial_command = 'CFG AFE ALL INITIAL'

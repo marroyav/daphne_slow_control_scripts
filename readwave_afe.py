@@ -7,21 +7,22 @@
 from oei import *
 import numpy as np 
 import matplotlib.pyplot as plt
+import time
 
 def main():
     keep_plotting = True
     ###### edit these lines depending on the daphne, AFEs, and channels you want to look at 
     # for the daphne you'd like to look at, put the endpoint of its ip address here
-    daphne_ip_endpoint = 104
+    daphne_ip_endpoint = 107
     # put number that's on sticker. Used for labeling plot.
     daphne_sticker = 1
     # list the channels you'd like to plot
     channels = [0, 1, 2, 3, 4, 5, 6, 7]
-    channels = [0,1]
+    #channels = [0]
     # AFEs to look at
-    AFEs = [0] # 0, 1, 2, 3, and/or 4
+    AFEs = [0,1,2,3,4] # 0, 1, 2, 3, and/or 4
     #######
-    
+    print(f'Acquiring and plotting {len(channels)} channels and {len(AFEs)} AFEs in DAPHNE with endpoint {daphne_ip_endpoint}')
     # plot-related stuff to adjust for showing different numbers of AFEs
     if len(AFEs) == 1:
         figsize = (7,5)
@@ -36,28 +37,30 @@ def main():
         figsize = (16, 9)
         nrows, ncols = 2, 3
     
-    #fig, axes = plt.subplots(nrows=nrows, ncols=ncols, sharex=False, sharey=False, figsize=figsize)
-    if len(AFEs) == 1:
-        axes = [axes]
     plt.ion()
     # don't change these
     base_register = 0x40000000
     AFE_hex_base = 0x100000
     Channel_hex_base = 0x10000
          
-    do_software_trigger = False
+    do_software_trigger = True
         
     thing = OEI(f"10.73.137.{daphne_ip_endpoint}")
-         
+    
     colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:gray', 'tab:olive']
     while keep_plotting:
+        total_time = 0
         fig, axes = plt.subplots(nrows=nrows, ncols=ncols, sharex=False, sharey=False, figsize=figsize)
+        if len(AFEs) == 1:
+            axes = [axes]
         if do_software_trigger:
             thing.write(0x2000,[1234]) # trigger SPI buffer
         # this list of lists is used to store waveform data
         rec = [[] for i in range(len(channels))]
         # loop through AFEs, grab waveforms from channels and plot
+        
         for g,AFE in enumerate(AFEs):
+            start = time.time()
             # this list of lists is used to store waveform data
             rec = [[] for i in range(len(channels))]
             for i in range (0x3ff):
@@ -65,7 +68,9 @@ def main():
                     doutrec = thing.read(base_register+(AFE_hex_base * AFE)+(Channel_hex_base * channel)+i,1)
                     for word in doutrec[2:]:
                         rec[d].append(word)
-        
+            end = time.time()
+            total_time += end-start
+            #print('Time to acquire: ', end-start)
             for d,channel in enumerate(channels):
                 if len(AFEs) <= 3:
                     plot = axes[g]
@@ -92,13 +97,17 @@ def main():
             axes[1, 1].remove()
         plt.show(block=False)
         plt.pause(1)
-        user_input = input("Enter 'a' to acquire again, 'q' to quit.\n")
+        print('Total time to acquire {len(channels) * len(AFEs)} channels is {"%.4f" % total_time} seconds.')
+        user_input = input("Enter 'a' to acquire again, 'q' to quit, or enter a new DAPHNE endpoint address (e.g. 107, 109).\n")
         if user_input == 'q':
             keep_plotting = False
             thing.close()
         elif user_input == 'a':
             plt.close()
             continue
+        elif user_input.isnumeric():
+            plt.close()
+            daphne_ip_endpoint = int(user_input)
         else:
             continue
 

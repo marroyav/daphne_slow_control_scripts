@@ -15,6 +15,7 @@ class config(object):
         print("test resgisters %0X" % thing.read(0xaa55,1)[2])
         print("endpoint address %0X" % thing.read(0x4001,1)[2])
         print("register 5001 %0X" % thing.read(0x5001,1)[2])
+        print("register 3000 %0X" % thing.read(0x3000,1)[2])
 
         epstat = thing.read(0x4000,1)[2] # read the timing endpoint and master clock status register
 
